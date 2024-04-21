@@ -6,7 +6,7 @@ using XFEExtension.NetCore.XApp.Core;
 
 namespace XFEExtension.NetCore.XApp;
 
-public class XAppLoader
+public static class XAppLoader
 {
     public static async Task<Page?> GetMainPage(Core.XApp xApp)
     {
