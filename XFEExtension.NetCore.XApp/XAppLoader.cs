@@ -36,7 +36,31 @@ public static class XAppLoader
         var compilationOptions = new CSharpCompilationOptions(OutputKind.WindowsApplication);
         var compilation = CSharpCompilation.Create("ProcessingAssembly")
             .WithOptions(compilationOptions)
-            .AddReferences(AppDomain.CurrentDomain.GetAssemblies().Where(assembly => !assembly.IsDynamic && !string.IsNullOrWhiteSpace(assembly.Location)).Select(assembly => MetadataReference.CreateFromFile(assembly.Location)))
+            .AddReferences
+            (
+                MetadataReference.CreateFromFile(Assembly.Load("System").Location),
+                MetadataReference.CreateFromFile(Assembly.Load("System.Runtime").Location),
+                MetadataReference.CreateFromFile(Assembly.Load("System.Private.CoreLib").Location),
+                MetadataReference.CreateFromFile(Assembly.Load("System.Runtime.Loader").Location),
+                MetadataReference.CreateFromFile(Assembly.Load("System.Collections.Concurrent").Location),
+                MetadataReference.CreateFromFile(Assembly.Load("System.Linq.Expressions").Location),
+                MetadataReference.CreateFromFile(Assembly.Load("System.Collections").Location),
+                MetadataReference.CreateFromFile(Assembly.Load("System.Linq").Location),
+                MetadataReference.CreateFromFile(Assembly.Load("System.Threading").Location),
+                MetadataReference.CreateFromFile(Assembly.Load("System.Threading.Tasks").Location),
+                MetadataReference.CreateFromFile(Assembly.Load("Microsoft.CSharp").Location),
+                MetadataReference.CreateFromFile(Assembly.Load("System.ObjectModel").Location),
+                MetadataReference.CreateFromFile(Assembly.Load("System.Text.Encoding.Extensions").Location),
+                MetadataReference.CreateFromFile(Assembly.Load("System.Collections.Immutable").Location),
+                MetadataReference.CreateFromFile(Assembly.Load("System").Location),
+                MetadataReference.CreateFromFile(Assembly.Load("Microsoft.Maui").Location),
+                MetadataReference.CreateFromFile(Assembly.Load("Microsoft.Maui.Controls").Location),
+                MetadataReference.CreateFromFile(Assembly.Load("Microsoft.Maui.Controls.Xaml").Location),
+                MetadataReference.CreateFromFile(Assembly.Load("XFEExtension.NetCore.XApp.Core").Location),
+                MetadataReference.CreateFromFile(Assembly.Load("XFEExtension.NetCore.XApp").Location),
+                MetadataReference.CreateFromFile(Assembly.Load("Microsoft.Maui.Essentials").Location),
+                MetadataReference.CreateFromFile(Assembly.Load("Microsoft.Maui.Graphics").Location)
+            )
             .AddSyntaxTrees(syntaxTrees);
         byte[] assemblyBytes;
         using var stream = new MemoryStream();
