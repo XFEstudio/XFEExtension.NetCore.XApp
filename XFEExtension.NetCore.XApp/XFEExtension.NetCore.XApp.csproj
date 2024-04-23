@@ -15,9 +15,9 @@
     <PackageIcon>logoIcon.png</PackageIcon>
     <RepositoryUrl>https://github.com/XFEstudio/XFEExtension.NetCore.XApp</RepositoryUrl>
     <PackageTags>XApp;XFE</PackageTags>
-    <PackageReleaseNotes>fix-修复编译引用程序集的bug</PackageReleaseNotes>
+    <PackageReleaseNotes>优化程序解包结构</PackageReleaseNotes>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -38,7 +38,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.9.2" />
     <PackageReference Include="Microsoft.Maui.Controls" Version="8.0.20" />
-    <PackageReference Include="XFEExtension.NetCore.XApp.Core" Version="1.0.0" />
+    <PackageReference Include="XFEExtension.NetCore.XApp.Core" Version="1.0.7" />
   </ItemGroup>
 
 </Project>

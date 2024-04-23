@@ -31,6 +31,23 @@ public static class XAppLoader
         var syntaxTrees = new List<SyntaxTree>();
         foreach (var xAppCode in xAppCodes)
         {
+            if (xAppCode.FileType == XAppFileType.XFML)
+                continue;
+            var fileName = Path.GetFileNameWithoutExtension(xAppCode.FileName);
+            var split = fileName.Split('.');
+            if (split.Length > 1)
+            {
+                fileName = split[0];
+            }
+            if (xAppCode.FileType == XAppFileType.CS && xAppCode.FileName.Contains(".g.cs"))
+            {
+                var autoGenCodeFile = xAppCodes.Where(code => code.FileType == XAppFileType.XFML && code.FileName.Contains($"{fileName}")).ToArray();
+                if (autoGenCodeFile is not null && autoGenCodeFile.Length > 0)
+                {
+                    var codeFile = autoGenCodeFile[0];
+                    xAppCode.Code = xAppCode.Code?.Replace("[XFMLTOLOAD]", codeFile.Code);
+                }
+            }
             syntaxTrees.Add(SyntaxFactory.ParseSyntaxTree(xAppCode.Code!));
         }
         var compilationOptions = new CSharpCompilationOptions(OutputKind.WindowsApplication);
