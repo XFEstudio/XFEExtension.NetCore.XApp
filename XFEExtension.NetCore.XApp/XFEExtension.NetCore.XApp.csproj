@@ -17,7 +17,7 @@
     <PackageTags>XApp;XFE</PackageTags>
     <PackageReleaseNotes>优化程序解包结构</PackageReleaseNotes>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
-    <Version>1.0.2</Version>
+    <Version>1.0.3</Version>
   </PropertyGroup>
 
   <ItemGroup>

@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using System.Diagnostics;
 using System.Reflection;
 using XFEExtension.NetCore.XApp.Core;
+using XFEExtension.NetCore.XFETransform;
 
 namespace XFEExtension.NetCore.XApp;
 
@@ -45,8 +46,9 @@ public static class XAppLoader
                 if (autoGenCodeFile is not null && autoGenCodeFile.Length > 0)
                 {
                     var codeFile = autoGenCodeFile[0];
-                    xAppCode.Code = xAppCode.Code?.Replace("[XFMLTOLOAD]", codeFile.Code);
+                    xAppCode.Code = xAppCode.Code?.Replace("[XFMLTOLOAD]", codeFile.Code?.Replace("\"", "\"\""));
                 }
+                Console.WriteLine(xAppCode.Code);
             }
             syntaxTrees.Add(SyntaxFactory.ParseSyntaxTree(xAppCode.Code!));
         }
