@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Reflection;
 using XFEExtension.NetCore.XApp.Core;
@@ -9,9 +10,10 @@ namespace XFEExtension.NetCore.XApp;
 
 public static class XAppLoader
 {
-    public static async Task<Page?> GetMainPage(Core.XApp xApp)
+    public static async Task<Page?> GetMainPage(Core.XApp xApp, out ImmutableArray<Diagnostic> diagnostics)
     {
-        var mainMethod = LoadAssemblyFromXApp(xApp)?.EntryPoint;
+        var mainMethod = LoadAssemblyFromXApp(xApp, out var innerDiagnostic)?.EntryPoint;
+        diagnostics = innerDiagnostic;
         if (mainMethod is not null)
         {
             if (mainMethod?.ReturnType == typeof(Task))
@@ -26,13 +28,13 @@ public static class XAppLoader
         }
     }
 
-    public static Assembly? LoadAssemblyFromXApp(Core.XApp xApp) => CompilateCode(xApp.AppFiles.CodeFiles);
-    public static Assembly? CompilateCode(params XAppCode[] xAppCodes)
+    public static Assembly? LoadAssemblyFromXApp(Core.XApp xApp, out ImmutableArray<Diagnostic> diagnostic) => CompilateCode(out diagnostic, xApp.AppFiles.CodeFiles);
+    public static Assembly? CompilateCode(out ImmutableArray<Diagnostic> diagnostics, params XAppCode[] xAppCodes)
     {
         var syntaxTrees = new List<SyntaxTree>();
         foreach (var xAppCode in xAppCodes)
         {
-            if (xAppCode.FileType == XAppFileType.XFML)
+            if (xAppCode.FileType == XAppFileType.XFML || xAppCode.FileType == XAppFileType.Resource || xAppCode.FileType == XAppFileType.Image)
                 continue;
             var fileName = Path.GetFileNameWithoutExtension(xAppCode.FileName);
             var split = fileName.Split('.');
@@ -95,6 +97,7 @@ public static class XAppLoader
             else
                 Trace.WriteLine(diagnostic.ToString());
         }
+        diagnostics = result.Diagnostics;
         if (result.Success)
         {
             assemblyBytes = stream.ToArray();
