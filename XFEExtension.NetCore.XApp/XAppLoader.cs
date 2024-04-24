@@ -17,7 +17,7 @@ public static class XAppLoader
     /// </summary>
     /// <param name="xApp">XApp对象</param>
     /// <returns>编译结果信息</returns>
-    public static async Task<CompilateResult> GetMainPage(Core.XApp xApp) => await GetMainPage(LoadAssemblyFromXApp(xApp, out var diagnostic), diagnostic);
+    public static async Task<CompilateResult> GetMainPage(Core.XApp xApp) => await GetMainPage(LoadAssemblyFromXApp(xApp, out _, out var diagnostic), diagnostic);
     /// <summary>
     /// 获取主页面
     /// </summary>
@@ -45,16 +45,18 @@ public static class XAppLoader
     /// 从XApp对象中加载程序集
     /// </summary>
     /// <param name="xApp">XApp对象</param>
+    /// <param name="assemblyBytes">程序集字节</param>
     /// <param name="diagnostic">诊断信息</param>
     /// <returns></returns>
-    public static Assembly? LoadAssemblyFromXApp(Core.XApp xApp, out ImmutableArray<Diagnostic> diagnostic) => CompilateCode(out diagnostic, xApp.AppFiles.CodeFiles);
+    public static Assembly? LoadAssemblyFromXApp(Core.XApp xApp, out byte[]? assemblyBytes, out ImmutableArray<Diagnostic> diagnostic) => CompilateCode(out assemblyBytes, out diagnostic, xApp.AppFiles.CodeFiles);
     /// <summary>
     /// 编译代码
     /// </summary>
+    /// <param name="assemblyBytes">程序集字节</param>
     /// <param name="diagnostics">诊断信息</param>
     /// <param name="xAppCodes">XApp的代码文件</param>
     /// <returns></returns>
-    public static Assembly? CompilateCode(out ImmutableArray<Diagnostic> diagnostics, params XAppCode[] xAppCodes)
+    public static Assembly? CompilateCode(out byte[]? assemblyBytes, out ImmutableArray<Diagnostic> diagnostics, params XAppCode[] xAppCodes)
     {
         var syntaxTrees = new List<SyntaxTree>();
         foreach (var xAppCode in xAppCodes)
@@ -107,7 +109,6 @@ public static class XAppLoader
                 MetadataReference.CreateFromFile(Assembly.Load("Microsoft.Maui.Graphics").Location)
             )
             .AddSyntaxTrees(syntaxTrees);
-        byte[] assemblyBytes;
         using var stream = new MemoryStream();
         var result = compilation.Emit(stream);
         foreach (var diagnostic in result.Diagnostics)
@@ -130,6 +131,7 @@ public static class XAppLoader
         }
         else
         {
+            assemblyBytes = null;
             return null;
         }
     }
