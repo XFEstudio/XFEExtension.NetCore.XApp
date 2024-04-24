@@ -1,38 +1,58 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Reflection;
 using XFEExtension.NetCore.XApp.Core;
-using XFEExtension.NetCore.XFETransform;
 
 namespace XFEExtension.NetCore.XApp;
 
+/// <summary>
+/// XApp加载器
+/// </summary>
 public static class XAppLoader
 {
-    public static async Task<Page?> GetMainPage(Core.XApp xApp)
+    /// <summary>
+    /// 编译并获取主页面
+    /// </summary>
+    /// <param name="xApp">XApp对象</param>
+    /// <returns>编译结果信息</returns>
+    public static async Task<CompilateResult> GetMainPage(Core.XApp xApp)
     {
-        var mainMethod = LoadAssemblyFromXApp(xApp)?.EntryPoint;
+        var mainMethod = LoadAssemblyFromXApp(xApp, out var diagnostic)?.EntryPoint;
         if (mainMethod is not null)
         {
             if (mainMethod?.ReturnType == typeof(Task))
                 await (Task)mainMethod.Invoke(null, [Array.Empty<string>()])!;
             else
                 mainMethod?.Invoke(null, [Array.Empty<string>()]);
-            return XAppBuilder.CurrentXAppMainPage;
+            var pageIsNotNull = XAppBuilder.CurrentXAppMainPage is not null;
+            return new CompilateResult(pageIsNotNull, XAppBuilder.CurrentXAppMainPage, diagnostic);
         }
         else
         {
-            return null;
+            return new CompilateResult(false, null, diagnostic);
         }
     }
-
-    public static Assembly? LoadAssemblyFromXApp(Core.XApp xApp) => CompilateCode(xApp.AppFiles.CodeFiles);
-    public static Assembly? CompilateCode(params XAppCode[] xAppCodes)
+    /// <summary>
+    /// 从XApp对象中加载程序集
+    /// </summary>
+    /// <param name="xApp">XApp对象</param>
+    /// <param name="diagnostic">诊断信息</param>
+    /// <returns></returns>
+    public static Assembly? LoadAssemblyFromXApp(Core.XApp xApp, out ImmutableArray<Diagnostic> diagnostic) => CompilateCode(out diagnostic, xApp.AppFiles.CodeFiles);
+    /// <summary>
+    /// 编译代码
+    /// </summary>
+    /// <param name="diagnostics">诊断信息</param>
+    /// <param name="xAppCodes">XApp的代码文件</param>
+    /// <returns></returns>
+    public static Assembly? CompilateCode(out ImmutableArray<Diagnostic> diagnostics, params XAppCode[] xAppCodes)
     {
         var syntaxTrees = new List<SyntaxTree>();
         foreach (var xAppCode in xAppCodes)
         {
-            if (xAppCode.FileType == XAppFileType.XFML)
+            if (xAppCode.FileType == XAppFileType.XFML || xAppCode.FileType == XAppFileType.Resource || xAppCode.FileType == XAppFileType.Image)
                 continue;
             var fileName = Path.GetFileNameWithoutExtension(xAppCode.FileName);
             var split = fileName.Split('.');
@@ -95,6 +115,7 @@ public static class XAppLoader
             else
                 Trace.WriteLine(diagnostic.ToString());
         }
+        diagnostics = result.Diagnostics;
         if (result.Success)
         {
             assemblyBytes = stream.ToArray();
