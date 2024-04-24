@@ -17,9 +17,16 @@ public static class XAppLoader
     /// </summary>
     /// <param name="xApp">XApp对象</param>
     /// <returns>编译结果信息</returns>
-    public static async Task<CompilateResult> GetMainPage(Core.XApp xApp)
+    public static async Task<CompilateResult> GetMainPage(Core.XApp xApp) => await GetMainPage(LoadAssemblyFromXApp(xApp, out var diagnostic), diagnostic);
+    /// <summary>
+    /// 获取主页面
+    /// </summary>
+    /// <param name="xAppAssembly">XApp程序集</param>
+    /// <param name="diagnostics">诊断信息</param>
+    /// <returns>编译结果信息</returns>
+    public static async Task<CompilateResult> GetMainPage(Assembly? xAppAssembly, ImmutableArray<Diagnostic> diagnostics)
     {
-        var mainMethod = LoadAssemblyFromXApp(xApp, out var diagnostic)?.EntryPoint;
+        var mainMethod = xAppAssembly?.EntryPoint;
         if (mainMethod is not null)
         {
             if (mainMethod?.ReturnType == typeof(Task))
@@ -27,11 +34,11 @@ public static class XAppLoader
             else
                 mainMethod?.Invoke(null, [Array.Empty<string>()]);
             var pageIsNotNull = XAppBuilder.CurrentXAppMainPage is not null;
-            return new CompilateResult(pageIsNotNull, XAppBuilder.CurrentXAppMainPage, diagnostic);
+            return new CompilateResult(pageIsNotNull, XAppBuilder.CurrentXAppMainPage, diagnostics);
         }
         else
         {
-            return new CompilateResult(false, null, diagnostic);
+            return new CompilateResult(false, null, diagnostics);
         }
     }
     /// <summary>
@@ -91,7 +98,6 @@ public static class XAppLoader
                 MetadataReference.CreateFromFile(Assembly.Load("System.ObjectModel").Location),
                 MetadataReference.CreateFromFile(Assembly.Load("System.Text.Encoding.Extensions").Location),
                 MetadataReference.CreateFromFile(Assembly.Load("System.Collections.Immutable").Location),
-                MetadataReference.CreateFromFile(Assembly.Load("System").Location),
                 MetadataReference.CreateFromFile(Assembly.Load("Microsoft.Maui").Location),
                 MetadataReference.CreateFromFile(Assembly.Load("Microsoft.Maui.Controls").Location),
                 MetadataReference.CreateFromFile(Assembly.Load("Microsoft.Maui.Controls.Xaml").Location),
