@@ -10,7 +10,7 @@ internal class Program
     {
         try
         {
-            var app = CreateXApp();
+            var app = CreateFirstXApp();
             var page = await app.GetMainPage();
         }
         catch (Exception ex)
@@ -19,9 +19,9 @@ internal class Program
         }
     }
 
-    private static XApp CreateXApp()
+    private static XApp CreateFirstXApp()
     {
-        var appInfo = new XAppInformation(string.Empty, "be98276c-48d6-451d-8a0a-a311d782d9d6", "第一个小程序", new Version(1, 0, 3), "这是第一个小程序", "XFE工作室室长", "4174240069", string.Empty, string.Empty, string.Empty, string.Empty);
+        var appInfo = new XAppInformation(string.Empty, "be98276c-48d6-451d-8a0a-a311d782d9d6", "第一个小程序", new Version(1, 0, 5), "这是第一个小程序", "XFE工作室室长", "4174240069", string.Empty, string.Empty, string.Empty, string.Empty);
         var xApp = new XApp
         {
             AppInformation = appInfo
@@ -34,7 +34,7 @@ internal class Program
                 public static void Main(string[] args)
                 {
                     XAppBuilder.CreateBuilder()
-                               .WithPageDev(new MainPage())
+                               .WithShellDev(new AppShell())
                                .BuildAndRun();
                 }
             }
@@ -65,7 +65,7 @@ internal class Program
                 }
             }
             """"));
-        xApp.AppFiles.Add(XAppCode.FromCode(XAppFileType.CS, "MainPage.g.cs", """"
+        xApp.AppFiles.Add(XAppCode.FromCode(XAppFileType.CS, "MainPage.g.cs", """
             namespace MyFirstXApp;
 
             public partial class MainPage
@@ -75,7 +75,7 @@ internal class Program
                     this.LoadFromXaml(@"[XFMLTOLOAD]");
                 }
             }
-            """"));
+            """));
         xApp.AppFiles.Add(XAppCode.FromCode(XAppFileType.XFML, "MainPage.xfml", """
             <?xml version="1.0" encoding="utf-8" ?>
             <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
@@ -88,6 +88,41 @@ internal class Program
                     <Label Text="这是一个小程序" FontSize="12" HorizontalOptions="Center"/>
                 </StackLayout>
             </ContentPage>
+            """));
+        xApp.AppFiles.Add(XAppCode.FromCode(XAppFileType.XFCS, "AppShell.xfcs", """"
+            namespace MyFirstXApp;
+
+            public partial class AppShell : Shell
+            {
+                public AppShell()
+                {
+                    InitXAppPage();
+                }
+            }
+            """"));
+        xApp.AppFiles.Add(XAppCode.FromCode(XAppFileType.CS, "AppShell.g.cs", """
+            namespace MyFirstXApp;
+
+            public partial class AppShell
+            {
+                internal void InitXAppPage()
+                {
+                    this.LoadFromXaml(@"[XFMLTOLOAD]");
+                    this.AddLogicalChild(new ShellContent()
+                        {
+                            ContentTemplate = new DataTemplate(typeof(MainPage))
+                        });
+                }
+            }
+            """));
+        xApp.AppFiles.Add(XAppCode.FromCode(XAppFileType.XFML, "AppShell.xfml", """
+            <?xml version="1.0" encoding="UTF-8" ?>
+            <Shell
+                x:Class="MyFirstXApp.AppShell"
+                xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                xmlns:local="clr-namespace:MyFirstXApp">
+            </Shell>
             """));
         return xApp;
     }

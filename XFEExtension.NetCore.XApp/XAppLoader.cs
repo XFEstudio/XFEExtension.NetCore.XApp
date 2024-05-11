@@ -79,6 +79,7 @@ public static class XAppLoader
                     var codeFile = autoGenCodeFile[0];
                     xAppCode.Code = xAppCode.Code?.Replace("[XFMLTOLOAD]", codeFile.Code?.Replace("\"", "\"\""));
                 }
+                Console.WriteLine(xAppCode.Code);
             }
             syntaxTrees.Add(SyntaxFactory.ParseSyntaxTree(xAppCode.Code!));
         }
